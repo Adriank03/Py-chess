@@ -51,10 +51,10 @@ class Pond(Piece):
                     pos.append(i.position)
                 if(round(self.position[0]+77.5, 1) == i.position[0] and shiftedy == i.position[1]):#diagonal
                     pos.append(i.position)
-                if(self.position[0] == i.position[0] and shiftedy == i.position[1]):#black piece blocking
+                if(self.position[0] == i.position[0] and shiftedy == i.position[1]):#white piece blocking
                     blocked = True
             if (blocked == False): 
-                for i in WhitePlayer.pieces:
+                for i in BlackPlayer.pieces:
                     if(self.position[0] == i.position[0] and shiftedy == i.position[1]): #if white piece is blocking
                         blocked = True
                         break
@@ -388,25 +388,48 @@ def kingmovehelper(BlackPlayer, WhitePlayer, new_pos, king):
         Helper for king movement, depicts if king's move will collide in the path of any of the opponents pieces movement.
         Returns true if safe for king to move there.
     """
+    temp_remove = None
     if (king.colour == "White"):
+        for i in BlackPlayer.pieces:
+            if(i.position == new_pos):
+                temp_remove = i
+                BlackPlayer.pieces.remove(i)
+                break
         for i in BlackPlayer.pieces:
             if(i.name == "King"):
                 for j in i.movement(BlackPlayer, WhitePlayer, True):
                     if (j[0]==new_pos[0] and j[1]==new_pos[1]):
+                        if(temp_remove!=None):
+                            BlackPlayer.pieces.append(temp_remove)
                         return False
             else:
                 for j in i.movement(BlackPlayer, WhitePlayer):
                     if (j[0]==new_pos[0] and j[1]==new_pos[1]):
+                        if(temp_remove!=None):
+                            BlackPlayer.pieces.append(temp_remove)
                         return False
+        if(temp_remove!=None):
+            BlackPlayer.pieces.append(temp_remove)
                 
     if (king.colour == "Black"):
+        for i in WhitePlayer.pieces:
+            if(i.position == new_pos):
+                temp_remove = i
+                WhitePlayer.pieces.remove(i)
+                break
         for i in WhitePlayer.pieces:
             if(i.name == "King"):
                 for j in i.movement(BlackPlayer, WhitePlayer, True):
                     if (j[0]==new_pos[0] and j[1]==new_pos[1]):
+                        if(temp_remove!=None):
+                           WhitePlayer.pieces.append(temp_remove)
                         return False
             else:
                 for j in i.movement(BlackPlayer, WhitePlayer):
                     if (j[0]==new_pos[0] and j[1]==new_pos[1]):
+                        if(temp_remove!=None):
+                            WhitePlayer.pieces.append(temp_remove)
                         return False
+        if(temp_remove!=None):
+            WhitePlayer.pieces.append(temp_remove)
     return True

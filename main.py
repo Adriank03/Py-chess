@@ -1,7 +1,6 @@
-#notes: horizontal gap is 77.5 vertical gap is 76.7
+import pygame
 from player import *
 from pieces import *
-import pygame
 
 pygame.init()
 import pygame.freetype
