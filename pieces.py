@@ -388,6 +388,7 @@ def kingmovehelper(BlackPlayer, WhitePlayer, new_pos, king):
         Helper for king movement, depicts if king's move will collide in the path of any of the opponents pieces movement.
         Returns true if safe for king to move there.
     """
+    print("calling")
     temp_remove = None
     if (king.colour == "White"):
         for i in BlackPlayer.pieces:
@@ -396,13 +397,20 @@ def kingmovehelper(BlackPlayer, WhitePlayer, new_pos, king):
                 BlackPlayer.pieces.remove(i)
                 break
         for i in BlackPlayer.pieces:
-            if(i.name == "King"):
+            if(i.name == "Pond"):
+                print(i.name + "1")
+                if(round(i.position[0]-hshift, 1) == new_pos[0] and round(i.position[1]+vshift, 1) == new_pos[1]):
+                    return False
+                if(round(i.position[0]+hshift, 1) == new_pos[0] and round(i.position[1]+vshift, 1) == new_pos[1]):
+                    return False
+            elif(i.name == "King"):
                 for j in i.movement(BlackPlayer, WhitePlayer, True):
                     if (j[0]==new_pos[0] and j[1]==new_pos[1]):
                         if(temp_remove!=None):
                             BlackPlayer.pieces.append(temp_remove)
                         return False
             else:
+                print(i.name + "2")
                 for j in i.movement(BlackPlayer, WhitePlayer):
                     if (j[0]==new_pos[0] and j[1]==new_pos[1]):
                         if(temp_remove!=None):
@@ -410,7 +418,7 @@ def kingmovehelper(BlackPlayer, WhitePlayer, new_pos, king):
                         return False
         if(temp_remove!=None):
             BlackPlayer.pieces.append(temp_remove)
-                
+
     if (king.colour == "Black"):
         for i in WhitePlayer.pieces:
             if(i.position == new_pos):
@@ -418,7 +426,12 @@ def kingmovehelper(BlackPlayer, WhitePlayer, new_pos, king):
                 WhitePlayer.pieces.remove(i)
                 break
         for i in WhitePlayer.pieces:
-            if(i.name == "King"):
+            if(i.name == "Pond"):
+                if(round(i.position[0]-hshift, 1) == new_pos[0] and round(i.position[1]-vshift, 1) == new_pos[1]):
+                    return False
+                if(round(i.position[0]+hshift, 1) == new_pos[0] and round(i.position[1]-vshift, 1) == new_pos[1]):
+                    return False
+            elif(i.name == "King"):
                 for j in i.movement(BlackPlayer, WhitePlayer, True):
                     if (j[0]==new_pos[0] and j[1]==new_pos[1]):
                         if(temp_remove!=None):
