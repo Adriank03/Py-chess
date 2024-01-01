@@ -9,347 +9,275 @@ class Piece():
         self.position = position
         
 
-    def movement(self, BlackPlayer, WhitePlayer):
+    def movement(self, BlackPlayer, WhitePlayer, board_Info):
         """
             Abstract method, should return pieces unique movement.
         """
         return []
 
-class Pond(Piece):
+class Pawn(Piece):
     def __init__(self, colour, position):
         super().__init__(colour, position)
-        self.name = "Pond"
-        self.sprite = pygame.transform.scale(pygame.image.load("images/" + colour + "_Pond.png"),(PieceWidth, PieceHeight))
+        self.name = "Pawn"
+        self.sprite = pygame.transform.smoothscale(pygame.image.load("images/" + colour + "_Pawn.png"),(PieceWidth, PieceHeight))
         self.points = 1
     
-    def movement(self, BlackPlayer, WhitePlayer):
-        pos = []
+    def movement(self, BlackPlayer, WhitePlayer, board_Info):
+        moves = []
         blocked = False
-        #for the white pond
+        #for the white Pawn
         if (self.colour == "White"):
             shiftedy=round(self.position[1]-76.7, 1)
-            for i in BlackPlayer.pieces:
-                if(round(self.position[0]-77.5, 1) == i.position[0] and shiftedy == i.position[1]):#diagonal
-                    pos.append(i.position)
-                if(round(self.position[0]+77.5, 1) == i.position[0] and shiftedy == i.position[1]):#diagonal
-                    pos.append(i.position)
-                if(self.position[0] == i.position[0] and shiftedy == i.position[1]):#black piece blocking
-                    blocked = True
-            if (blocked == False): 
-                for i in WhitePlayer.pieces:
-                    if(self.position[0] == i.position[0] and shiftedy == i.position[1]): #if white piece is blocking
-                        blocked = True
-                        break
-            if (blocked == False): #if no pieces are blocking
-                if(self.position[1]-76.7 > 50): #bounds of board
-                    pos.append((self.position[0], shiftedy)) 
+            pos=(self.position[0]-77.5, shiftedy)
+            if(pos in board_Info):
+                piece = board_Info[pos]
+                if piece.colour == "Black":
+                    moves.append(piece.position)
+            pos=(self.position[0]+77.5, shiftedy)
+            if(pos in board_Info):
+                piece = board_Info[pos]
+                if piece.colour == "Black":
+                    moves.append(piece.position)
+            pos=(self.position[0], shiftedy)
+            if(not (pos in board_Info)):
+                moves.append(pos)
 
         if (self.colour == "Black"):
             shiftedy=round(self.position[1]+76.7, 1)
-            for i in WhitePlayer.pieces:
-                if(round(self.position[0]-77.5, 1) == i.position[0] and shiftedy == i.position[1]):#diagonal
-                    pos.append(i.position)
-                if(round(self.position[0]+77.5, 1) == i.position[0] and shiftedy == i.position[1]):#diagonal
-                    pos.append(i.position)
-                if(self.position[0] == i.position[0] and shiftedy == i.position[1]):#white piece blocking
-                    blocked = True
-            if (blocked == False): 
-                for i in BlackPlayer.pieces:
-                    if(self.position[0] == i.position[0] and shiftedy == i.position[1]): #if white piece is blocking
-                        blocked = True
-                        break
-            if (blocked == False): #if no pieces are blocking
-                if(self.position[1]-76.7 > 50): #bounds of board
-                    pos.append((self.position[0], shiftedy)) 
-        return pos
+            pos=(self.position[0]-77.5, shiftedy)
+            if(pos in board_Info):
+                piece = board_Info[pos]
+                if piece.colour == "White":
+                    moves.append(piece.position)
+            pos=(self.position[0]+77.5, shiftedy)
+            if(pos in board_Info):
+                piece = board_Info[pos]
+                if piece.colour == "White":
+                    moves.append(piece.position)
+            pos=(self.position[0], shiftedy)
+            if(not (pos in board_Info)):
+                moves.append(pos)
+        return moves
 
 class Rook(Piece):
     def __init__(self, colour, position):
         super().__init__(colour, position)
         self.name = "Rook"
-        self.sprite = pygame.transform.scale(pygame.image.load("images/" + colour + "_Rook.png"),(PieceWidth, PieceHeight))
+        self.sprite = pygame.transform.smoothscale(pygame.image.load("images/" + colour + "_Rook.png"),(PieceWidth, PieceHeight))
         self.points = 5
 
-    def movement(self, BlackPlayer, WhitePlayer):
-        pos = []
-
+    def movement(self, BlackPlayer, WhitePlayer, board_Info):
+        moves = []
         #up
         i=1
-        blocked = 0
         while(i<8):
             shiftedy = round(self.position[1]-(76.7*i), 1)
-            if (shiftedy < 50):
-                i+=10
+            pos = (self.position[0], shiftedy)
+            if shiftedy < 55.0:
                 break
-            for j in BlackPlayer.pieces:
-                if(self.position[0] == j.position[0] and shiftedy == j.position[1]):
-                    if(self.colour == "White"):
-                        pos.append((self.position[0], shiftedy))
-                    i+=10
-                    blocked+=1
-                    break
-            if(blocked == 0):
-                for j in WhitePlayer.pieces:
-                    if(self.position[0] == j.position[0] and shiftedy == j.position[1]):
-                        if(self.colour == "Black"):
-                            pos.append((self.position[0], shiftedy))
-                        blocked+=1
-                        i+=10
+            if (not (pos in board_Info)):
+                moves.append(pos)
+            else:
+                piece = board_Info[pos]
+                if(self.colour == "Black"):
+                    if(piece.colour == "White"):
+                        moves.append(pos)
                         break
-            if(blocked == 0):
-                pos.append((self.position[0],shiftedy))
+                    else:
+                        break
+                if(self.colour == "White"):
+                    if(piece.colour == "Black"):
+                        moves.append(pos)
+                        break
+                    else:
+                        break
             i+=1
-
         #down
         i=1
-        blocked = 0
         while(i<8):
             shiftedy = round(self.position[1]+(76.7*i), 1)
-            if (shiftedy > 650):
-                i+=10
+            pos = (self.position[0], shiftedy)
+            if shiftedy > 591.9:
                 break
-            for j in BlackPlayer.pieces:
-                if(self.position[0] == j.position[0] and shiftedy == j.position[1]):
-                    if(self.colour == "White"):
-                        pos.append((self.position[0], shiftedy))
-                    i+=10
-                    blocked+=1
-                    break
-            if(blocked == 0):
-                for j in WhitePlayer.pieces:
-                    if(self.position[0] == j.position[0] and shiftedy == j.position[1]):
-                        if(self.colour == "Black"):
-                            pos.append((self.position[0], shiftedy))
-                        blocked+=1
-                        i+=10
+            if (not (pos in board_Info)):
+                moves.append(pos)
+            else:
+                piece = board_Info[pos]
+                if(self.colour == "Black"):
+                    if(piece.colour == "White"):
+                        moves.append(pos)
                         break
-            if(blocked == 0):
-                pos.append((self.position[0],shiftedy))
+                    else:
+                        break
+                if(self.colour == "White"):
+                    if(piece.colour == "Black"):
+                        moves.append(pos)
+                        break
+                    else:
+                        break
             i+=1
 
         #left
         i=1
-        blocked = 0
         while(i<8):
             shiftedx = round(self.position[0]-(77.5*i), 1)
-            if (shiftedx < 50):
-                i+=10
+            pos = (shiftedx, self.position[1])
+            if shiftedx < 70.5:
                 break
-            for j in BlackPlayer.pieces:
-                if(shiftedx == j.position[0] and self.position[1] == j.position[1]):
-                    if(self.colour == "White"):
-                        pos.append((shiftedx, self.position[1]))
-                    i+=10
-                    blocked+=1
-                    break
-            if(blocked == 0):
-                for j in WhitePlayer.pieces:
-                    if(shiftedx == j.position[0] and self.position[1] == j.position[1]):
-                        if(self.colour == "Black"):
-                            pos.append((shiftedx, self.position[1]))
-                        blocked+=1
-                        i+=10
+            if (not (pos in board_Info)):
+                moves.append(pos)
+            else:
+                piece = board_Info[pos]
+                if(self.colour == "Black"):
+                    if(piece.colour == "White"):
+                        moves.append(pos)
                         break
-            if(blocked == 0):
-                pos.append((shiftedx, self.position[1]))
-            i+=1
-
+                    else:
+                        break
+                if(self.colour == "White"):
+                    if(piece.colour == "Black"):
+                        moves.append(pos)
+                        break
+                    else:
+                        break   
+            i+=1            
         #right
         i=1
-        blocked = 0
         while(i<8):
             shiftedx = round(self.position[0]+(77.5*i), 1)
-            if (shiftedx > 650):
-                i+=10
+            pos = (shiftedx, self.position[1])
+            if shiftedx > 613:
                 break
-            for j in BlackPlayer.pieces:
-                if(shiftedx == j.position[0] and self.position[1] == j.position[1]):
-                    if(self.colour == "White"):
-                        pos.append((shiftedx, self.position[1]))
-                    i+=10
-                    blocked+=1
-                    break
-            if(blocked == 0):
-                for j in WhitePlayer.pieces:
-                    if(shiftedx == j.position[0] and self.position[1] == j.position[1]):
-                        if(self.colour == "Black"):
-                            pos.append((shiftedx, self.position[1]))
-                        blocked+=1
-                        i+=10
+            if (not (pos in board_Info)):
+                moves.append(pos)
+            else:
+                piece = board_Info[pos]
+                if(self.colour == "Black"):
+                    if(piece.colour == "White"):
+                        moves.append(pos)
                         break
-            if(blocked == 0):
-                pos.append((shiftedx, self.position[1]))
-            i+=1
-
-        return pos
+                    else:
+                        break
+                if(self.colour == "White"):
+                    if(piece.colour == "Black"):
+                        moves.append(pos)
+                        break
+                    else:
+                        break
+            i+=1                
+        return moves
     
 class Bishop(Piece):
     def __init__(self, colour, position):
         super().__init__(colour, position)
         self.name = "Bishop"
-        self.sprite = pygame.transform.scale(pygame.image.load("images/" + colour + "_Bishop.png"),(PieceWidth, PieceHeight))
+        self.sprite = pygame.transform.smoothscale(pygame.image.load("images/" + colour + "_Bishop.png"),(PieceWidth, PieceHeight))
         self.points = 3
 
-    def movement(self, BlackPlayer, WhitePlayer):
-        pos = []
-        i=1
-        stopupleft = False
-        stopupright = False
-        stopdownleft = False
-        stopdownright = False
+    def movement(self, BlackPlayer, WhitePlayer, board_Info):
+        moves = []
+        #upleft
 
-        while(i<8):
-            #upleft
-            shiftedx1 = round(self.position[0]-(77.5*i), 1)
-            shiftedy1 = round(self.position[1]-(76.7*i), 1)
-            #upright
-            shiftedx2 = round(self.position[0]+(77.5*i), 1)
-            shiftedy2 = round(self.position[1]-(76.7*i), 1)
-            #downleft
-            shiftedx3 = round(self.position[0]-(77.5*i), 1)
-            shiftedy3 = round(self.position[1]+(76.7*i), 1)
-            #downright
-            shiftedx4 = round(self.position[0]+(77.5*i), 1)
-            shiftedy4 = round(self.position[1]+(76.7*i), 1)
-
-            #check
-            for j in BlackPlayer.pieces: 
-                if(shiftedx1 == j.position[0] and shiftedy1 == j.position[1]):
-                    if(self.colour == "White" and stopupleft == False):
-                        pos.append((shiftedx1, shiftedy1))
-                    stopupleft = True
-                if(shiftedx2 == j.position[0] and shiftedy2 == j.position[1]):
-                    if(self.colour == "White" and stopupright == False):
-                        pos.append((shiftedx2, shiftedy2))
-                    stopupright = True
-                if(shiftedx3 == j.position[0] and shiftedy3 == j.position[1]):
-                    if(self.colour == "White" and stopdownleft == False):
-                        pos.append((shiftedx3, shiftedy3))
-                    stopdownleft = True
-                if(shiftedx4 == j.position[0] and shiftedy4 == j.position[1]):
-                    if(self.colour == "White" and stopdownright == False):
-                        pos.append((shiftedx4, shiftedy4))
-                    stopdownright = True
-
-            for j in WhitePlayer.pieces: 
-                if(shiftedx1 == j.position[0] and shiftedy1 == j.position[1]):
-                    if(self.colour == "Black" and stopupleft == False):
-                        pos.append((shiftedx1, shiftedy1))
-                    stopupleft = True
-                if(shiftedx2 == j.position[0] and shiftedy2 == j.position[1]):
-                    if(self.colour == "Black" and stopupright == False):
-                        pos.append((shiftedx2, shiftedy2))
-                    stopupright = True
-                if(shiftedx3 == j.position[0] and shiftedy3 == j.position[1]):
-                    if(self.colour == "Black" and stopdownleft == False):
-                        pos.append((shiftedx3, shiftedy3))
-                    stopdownleft = True
-                if(shiftedx4 == j.position[0] and shiftedy4 == j.position[1]):
-                    if(self.colour == "Black" and stopdownright == False):
-                        pos.append((shiftedx4, shiftedy4))
-                    stopdownright = True
-
-            if(stopupleft == False):
-                if(shiftedx1 > 50 and shiftedy1 > 50):
-                    pos.append((shiftedx1,shiftedy1))
-            if(stopupright == False):
-                if(shiftedx2 < 650 and shiftedy2 > 50):
-                    pos.append((shiftedx2,shiftedy2))
-            if(stopdownleft == False):
-                if(shiftedx3 > 50 and shiftedy3 < 650):
-                    pos.append((shiftedx3,shiftedy3))
-            if(stopdownright == False):
-                if(shiftedx4 < 650 and shiftedy4 < 650):
-                    pos.append((shiftedx4,shiftedy4))
-            i+=1
-
-        return pos
+        positions = [(-77.5, -76.7), (77.5, -76.7), (-77.5, 76.7), (77.5, 76.7)]
+        for j in range(0,4):
+            i=1
+            while(i<8):
+                currpos = (round(self.position[0]+(i*positions[j][0]), 1), round(self.position[1]+(i*positions[j][1]), 1))
+                if ((currpos[0]<70.5 or currpos[0]>613) or (currpos[1]<55 or currpos[1]>591.9)):
+                    break
+                if not(currpos in board_Info):
+                    moves.append(currpos)
+                else:
+                    if self.colour == "Black":
+                        if board_Info[currpos].colour == "White":
+                            moves.append(currpos)
+                            break
+                        else:
+                            break
+                    if self.colour == "White":
+                        if board_Info[currpos].colour == "Black":
+                            moves.append(currpos)
+                            break
+                        else:
+                            break
+                i+=1
+        return moves
     
 class Knight(Piece):
     def __init__(self, colour, position):
         super().__init__(colour, position)
         self.name = "Knight"
-        self.sprite = pygame.transform.scale(pygame.image.load("images/" + colour + "_Knight.png"),(PieceWidth, PieceHeight))
+        self.sprite = pygame.transform.smoothscale(pygame.image.load("images/" + colour + "_Knight.png"),(PieceWidth, PieceHeight))
         self.points = 3
 
-    def movement(self, BlackPlayer, WhitePlayer):
-        pos = []
-
-        shiftedpos = {
-        #upleft
-        "shiftedx1" : round(self.position[0]-(77.5), 1),
-        "shiftedy1" : round(self.position[1]-(76.7*2), 1),
-        #upright
-        "shiftedx2" : round(self.position[0]+(77.5), 1),
-        "shiftedy2" : round(self.position[1]-(76.7*2), 1),
-        #rightup
-        "shiftedx3" : round(self.position[0]+(77.5*2), 1),
-        "shiftedy3" : round(self.position[1]-(76.7), 1),
-        #rightdown
-        "shiftedx4" : round(self.position[0]+(77.5*2), 1),
-        "shiftedy4" : round(self.position[1]+(76.7), 1),
-        #downright
-        "shiftedx5" : round(self.position[0]+(77.5), 1),
-        "shiftedy5" : round(self.position[1]+(76.7*2), 1),
-        #downleft
-        "shiftedx6" : round(self.position[0]-(77.5), 1),
-        "shiftedy6" : round(self.position[1]+(76.7*2), 1),
-        #leftdown
-        "shiftedx7" : round(self.position[0]-(77.5*2), 1),
-        "shiftedy7" : round(self.position[1]+(76.7), 1),
-        #leftup
-        "shiftedx8" : round(self.position[0]-(77.5*2), 1),
-        "shiftedy8" : round(self.position[1]-(76.7), 1)
-        }
-        if(self.colour == "Black"):
-            for j in range(1,9):
-                add = True
-                for i in BlackPlayer.pieces:
-                    if (shiftedpos["shiftedx"+str(j)] == i.position[0] and shiftedpos["shiftedy"+str(j)] == i.position[1]):
-                        add = False
-                        break
-                if (add==True):
-                    if(50 < shiftedpos["shiftedx"+str(j)] < 650 and 50 < shiftedpos["shiftedy"+str(j)] < 650):
-                        pos.append((shiftedpos["shiftedx"+str(j)],shiftedpos["shiftedy"+str(j)]))
-
-        if(self.colour == "White"):
-            for j in range(1,9):
-                add = True
-                for i in WhitePlayer.pieces:
-                    if (shiftedpos["shiftedx"+str(j)] == i.position[0] and shiftedpos["shiftedy"+str(j)] == i.position[1]):
-                        add = False
-                        break
-                if (add==True):
-                    if(50 < shiftedpos["shiftedx"+str(j)] < 650 and 50 < shiftedpos["shiftedy"+str(j)] < 650):
-                        pos.append((shiftedpos["shiftedx"+str(j)],shiftedpos["shiftedy"+str(j)]))
-        return pos
+    def movement(self, BlackPlayer, WhitePlayer, board_Info):
+        #print("moving knight for " + self.colour)
+        moves = []
+        positions = [(-77.5,-76.7*2), (77.5, -76.7*2), (77.5*2, -76.7), (77.5*2, 76.7), (77.5, 76.7*2), (-77.5, 76.7*2), 
+                     (-77.5*2, 76.7), (-77.5*2, -76.7)]
+        for i in positions:
+            currpos = (round(self.position[0]+i[0], 1), round(self.position[1]+i[1], 1))
+            if ((currpos[0]>=70.5 and currpos[0]<=613) and (currpos[1]>=55.0 and currpos[1]<=591.9)):
+                if(not (currpos in board_Info)):
+                    moves.append(currpos)           
+                else:
+                    if(board_Info[currpos].colour != self.colour):
+                        moves.append(currpos)
+                        #print(self.colour)
+                        #print(board_Info[currpos].colour)
+        return moves
     
 class Queen(Piece):
     def __init__(self, colour, position):
         super().__init__(colour, position)
         self.name = "Queen"
-        self.sprite = pygame.transform.scale(pygame.image.load("images/" + colour + "_Queen.png"),(PieceWidth, PieceHeight))
+        self.sprite = pygame.transform.smoothscale(pygame.image.load("images/" + colour + "_Queen.png"),(PieceWidth, PieceHeight))
         self.points = 10
 
-    def movement(self, BlackPlayer, WhitePlayer):
+    def movement(self, BlackPlayer, WhitePlayer, board_Info):
         pos = []
         temp_Rook = Rook(self.colour, self.position)
         temp_Bishop = Bishop(self.colour, self.position)
-        pos.extend(temp_Rook.movement(BlackPlayer, WhitePlayer))
-        pos.extend(temp_Bishop.movement(BlackPlayer, WhitePlayer))
+        pos.extend(temp_Rook.movement(BlackPlayer, WhitePlayer, board_Info))
+        pos.extend(temp_Bishop.movement(BlackPlayer, WhitePlayer, board_Info))
         return pos
 
 class King(Piece):
     def __init__(self, colour, position):
         super().__init__(colour, position)
         self.name = "King"
-        self.sprite = pygame.transform.scale(pygame.image.load("images/" + colour + "_King.png"),(PieceWidth, PieceHeight))
+        self.sprite = pygame.transform.smoothscale(pygame.image.load("images/" + colour + "_King.png"),(PieceWidth, PieceHeight))
         self.points = 200
 
-    def movement(self, BlackPlayer, WhitePlayer, recursion):
-        pos = []
+    def movement(self, BlackPlayer, WhitePlayer, board_Info, recursion):
+        moves = []
         xvalues = [(-1)*hshift, 0, hshift]
         yvalues = [(-1)*vshift, 0, vshift]
+        for i in xvalues:
+            for j in yvalues:
+                currpos = (round(self.position[0]+i, 1), round(self.position[1]+j, 1))
+                if currpos != self.position:
+                    if ((currpos[0]>=70.5 and currpos[0]<=613) and (currpos[1]>=55.0 and currpos[1]<=591.9)):
+                        if(not (currpos in board_Info)):
+                            if (recursion == False):
+                                if(kingmovehelper(BlackPlayer, WhitePlayer, currpos, self, board_Info) == True):
+                                    moves.append(currpos)    
+                            else:
+                                 moves.append(currpos)       
+                        else:
+                            if(board_Info[currpos].colour != self.colour):
+                                if (recursion == False):
+                                    if(kingmovehelper(BlackPlayer, WhitePlayer, currpos, self, board_Info) == True):
+                                        moves.append(currpos)
+                                else:
+                                     moves.append(currpos)
+        return moves                
+
+
+
+
+
+
         for i in xvalues:
             for j in yvalues:
                 move = (round(self.position[0]+i, 1), round(self.position[1]+j, 1))
@@ -364,11 +292,10 @@ class King(Piece):
                             if (add == True):
                                 if (recursion == False):
                                     if(kingmovehelper(BlackPlayer, WhitePlayer, move, self) == True):
-                                        pos.append(move)
+                                            pos.append(move)
                                 else:
                                     pos.append(move)
-
-
+                        
                         if(self.colour == "Black"):
                             add = True
                             for k in BlackPlayer.pieces:
@@ -383,39 +310,100 @@ class King(Piece):
                                     pos.append(move)
         return pos
 
-def kingmovehelper(BlackPlayer, WhitePlayer, new_pos, king):
+def kingmovehelper(BlackPlayer, WhitePlayer, new_pos, king, board_Info):
     """
         Helper for king movement, depicts if king's move will collide in the path of any of the opponents pieces movement.
         Returns true if safe for king to move there.
     """
-    print("calling")
+    piece_holder=None
+    if king.colour == "Black":
+        player=BlackPlayer
+        otherplayer=WhitePlayer
+    else:
+        player=WhitePlayer
+        otherplayer=BlackPlayer
+    temp_piece = Pawn(king.colour, new_pos)
+    if(new_pos in board_Info):
+        piece_holder = board_Info[new_pos]
+        otherplayer.pieces.remove(piece_holder)
+    board_Info[new_pos]= temp_piece
+    player.pieces.append(temp_piece)
+    for i in otherplayer.pieces:
+        if i.name == "King":
+            if new_pos in i.movement(BlackPlayer, WhitePlayer, board_Info, True):
+                player.pieces.remove(temp_piece)
+                if piece_holder!=None:
+                    otherplayer.pieces.append(piece_holder)
+                    board_Info[new_pos] = piece_holder
+                else:
+                    board_Info.pop(new_pos)
+                return False
+        else:
+            if new_pos in i.movement(BlackPlayer, WhitePlayer, board_Info):
+                player.pieces.remove(temp_piece)
+                if piece_holder!=None:
+                    otherplayer.pieces.append(piece_holder)
+                    board_Info[new_pos] = piece_holder
+                else:
+                    board_Info.pop(new_pos)
+                return False
+    if piece_holder != None:
+        player.pieces.remove(temp_piece)
+        otherplayer.pieces.append(piece_holder)
+        board_Info[new_pos] = piece_holder
+    else:
+        player.pieces.remove(temp_piece)
+        board_Info.pop(new_pos)
+
+    return True
+
+
+
+
+
+
+
+
+
+
+
+
     temp_remove = None
+    #check if king kills a piece will it put it in check, which is an illegal move
     if (king.colour == "White"):
         for i in BlackPlayer.pieces:
-            if(i.position == new_pos):
+            if(i.position == new_pos): #checks if any enemy piece is on moving position
                 temp_remove = i
-                BlackPlayer.pieces.remove(i)
+                BlackPlayer.pieces.remove(i) #removes it for the sake of 
                 break
+
+        #check if p
         for i in BlackPlayer.pieces:
-            if(i.name == "Pond"):
-                print(i.name + "1")
-                if(round(i.position[0]-hshift, 1) == new_pos[0] and round(i.position[1]+vshift, 1) == new_pos[1]):
+            if(i.name == "Pawn"):
+                if(round(i.position[0]-hshift, 1) == new_pos[0] and round(i.position[1]+vshift, 1) == new_pos[1]): #Pawn left diag kill
+                    if(temp_remove != None):
+                        BlackPlayer.pieces.append(temp_remove)
                     return False
-                if(round(i.position[0]+hshift, 1) == new_pos[0] and round(i.position[1]+vshift, 1) == new_pos[1]):
+                if(round(i.position[0]+hshift, 1) == new_pos[0] and round(i.position[1]+vshift, 1) == new_pos[1]): #Pawn right diag kill
+                    if(temp_remove != None):
+                        BlackPlayer.pieces.append(temp_remove)
                     return False
             elif(i.name == "King"):
-                for j in i.movement(BlackPlayer, WhitePlayer, True):
+                for j in i.movement(BlackPlayer, WhitePlayer, board_Info, True):
                     if (j[0]==new_pos[0] and j[1]==new_pos[1]):
                         if(temp_remove!=None):
                             BlackPlayer.pieces.append(temp_remove)
                         return False
             else:
-                print(i.name + "2")
-                for j in i.movement(BlackPlayer, WhitePlayer):
+                currPos = king.position
+                king.position = new_pos
+                for j in i.movement(BlackPlayer, WhitePlayer, board_Info):
                     if (j[0]==new_pos[0] and j[1]==new_pos[1]):
                         if(temp_remove!=None):
                             BlackPlayer.pieces.append(temp_remove)
+                        king.position = currPos
                         return False
+                king.position = currPos
         if(temp_remove!=None):
             BlackPlayer.pieces.append(temp_remove)
 
@@ -426,23 +414,31 @@ def kingmovehelper(BlackPlayer, WhitePlayer, new_pos, king):
                 WhitePlayer.pieces.remove(i)
                 break
         for i in WhitePlayer.pieces:
-            if(i.name == "Pond"):
+            if(i.name == "Pawn"):
                 if(round(i.position[0]-hshift, 1) == new_pos[0] and round(i.position[1]-vshift, 1) == new_pos[1]):
+                    if(temp_remove != None):
+                        WhitePlayer.pieces.append(temp_remove)
                     return False
                 if(round(i.position[0]+hshift, 1) == new_pos[0] and round(i.position[1]-vshift, 1) == new_pos[1]):
+                    if(temp_remove != None):
+                        WhitePlayer.pieces.append(temp_remove)
                     return False
             elif(i.name == "King"):
-                for j in i.movement(BlackPlayer, WhitePlayer, True):
+                for j in i.movement(BlackPlayer, WhitePlayer, board_Info, True):
                     if (j[0]==new_pos[0] and j[1]==new_pos[1]):
                         if(temp_remove!=None):
                            WhitePlayer.pieces.append(temp_remove)
                         return False
             else:
-                for j in i.movement(BlackPlayer, WhitePlayer):
+                currPos = king.position
+                king.position = new_pos
+                for j in i.movement(BlackPlayer, WhitePlayer, board_Info):
                     if (j[0]==new_pos[0] and j[1]==new_pos[1]):
                         if(temp_remove!=None):
                             WhitePlayer.pieces.append(temp_remove)
+                        king.position = currPos
                         return False
+                king.position = currPos
         if(temp_remove!=None):
             WhitePlayer.pieces.append(temp_remove)
     return True
