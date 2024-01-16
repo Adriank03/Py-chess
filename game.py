@@ -25,7 +25,7 @@ font = pygame.freetype.Font("font.ttf", 22)
 
 def playGame(WIN, diff):
     WhitePlayersTurn = True
-    setUpInfo = setup()
+    setUpInfo = setup(1)
     WhitePlayer = setUpInfo[0]
     BlackPlayer = setUpInfo[1]
     board_Info = setUpInfo[2]
@@ -77,7 +77,7 @@ def playGame(WIN, diff):
             
     endScreen(WIN, checkMate, WhitePlayersTurn, diff)
 
-def setup():
+def setup(num):
     WhitePlayer = Player("White")
     BlackPlayer = Player("Black")
     BlackPlayer.pieces = []
@@ -92,7 +92,14 @@ def setup():
         WhitePlayer.pieces.append(whitePawn)
         boardInfo[blackPawn.position] = blackPawn
         boardInfo[whitePawn.position] = whitePawn
-    names = ["Rook","Knight", "Bishop", "Queen","King","Bishop", "Knight", "Rook"]
+    set1 = ["Rook","Knight", "Bishop", "Queen","King","Bishop", "Knight", "Rook"]
+    set2 = ["Rook","Knight", "Bishop", "King","Queen","Bishop", "Knight", "Rook"]
+
+    if(num == 1):
+        names = set1
+    else:
+        names = set2
+
     for i in range(0,8): #first ranks
         blackPiece = createpiece(names[i], "Black",(70.5+(77.5*i), 55.0))
         whitePiece = createpiece(names[i], "White",(70.5+(77.5*i), 591.9))
@@ -284,7 +291,9 @@ def move_piece(WhitePlayer, BlackPlayer, WIN, clicked_pos, moveable, piece, Whit
         otherPlayer = WhitePlayer
 
     #check if user clicked on a movable spot or not
+
     new_pos = find_square(clicked_pos)
+
     if(new_pos in moveable):
         if(new_pos in board_Info):
             enemyPiece = board_Info[new_pos]
@@ -348,7 +357,7 @@ def updateboard(WhitePlayer, BlackPlayer, WIN):
 
 def find_square(clickedpos):
     #x starts 70.5 ends 690.5
-    #y starts 55.0 ends 669.4
+    #y starts 55.0 ends 668.6
     #sq size is x=77.5 and y=76.7
     i=0
     j=0

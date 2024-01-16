@@ -35,7 +35,11 @@ class Button():
     def start(self, WIN):
         from screen import chooseDiff
         chooseDiff(WIN)
-    
+
+    def online(self, WIN):
+        from screen import createAccountPhase
+        createAccountPhase(WIN)
+
     def No_Bot(self, WIN):
         self.playAgain(WIN, "No_Bot")
 
@@ -45,6 +49,13 @@ class Button():
     def Smart(self, WIN):
         self.playAgain(WIN, "Smart")
 
+    def Create_Account1(self, WIN):
+        from screen import createAccountScreen1
+        createAccountScreen1(WIN)
+    
+    def login1(self, WIN):
+        from screen import loginscreen1
+        loginscreen1(WIN)
 
     def activate(self, WIN, diff):
         if(self.name == "play again"):
@@ -59,3 +70,9 @@ class Button():
             self.start(WIN)
         elif(self.name == "main menu"):
             self.mainMenu(WIN)
+        elif(self.name == "Online"):
+            self.online(WIN)
+        elif(self.name == "Create Account"):
+            self.Create_Account1(WIN)
+        elif(self.name == "Login"):
+            self.login1(WIN)
